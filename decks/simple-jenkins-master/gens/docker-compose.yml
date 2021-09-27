@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  jencondait.samexample.com:
+    hostname: 'jencondait.samexample.com'
+    image: jenconda
+    ports:
+      - "5000:5000"
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "../..:/repo"
+    # network_mode: "host"
+    networks:
+      simplejen:
+
+  # httpit:
+  #   image: pierrezemb/gostatic
+  #   ports:
+  #     - "8043:8043"
+  #   volumes:
+  #     - "../..:/srv/http"
+  #   networks:
+  #     simplejen:
+
+networks:
+  simplejen:
+    driver: bridge

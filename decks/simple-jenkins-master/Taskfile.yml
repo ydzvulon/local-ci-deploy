@@ -1,0 +1,45 @@
+# https://taskfile.dev
+
+version: '3'
+env:
+  _vcomment: '#'
+
+vars:
+  GREETING: Hello, World!
+  _dcomment_: "$(echo '$_vcomment')"
+
+  VAL_DC_UI_JENKINS_PORT_EXT: 28082
+
+  __gens_docker_compose_cont: |-
+    version: "3.9"
+    services:
+      jencondait.samexample.com:
+        hostname: 'jencondait.samexample.com'
+        image: yairdar/jenconda:v0.8.2rc-2021.09.27rc
+        ports:
+          - "{{.VAL_DC_UI_JENKINS_PORT_EXT}}:8080"
+        volumes:
+          - "/var/run/docker.sock:/var/run/docker.sock"
+          - "../..:/repo"
+        {{._dcomment_}} network_mode: "host"
+        networks:
+          simplejen:
+
+      {{._dcomment_}} httpit:
+      {{._dcomment_}}   image: pierrezemb/gostatic
+      {{._dcomment_}}   ports:
+      {{._dcomment_}}     - "8043:8043"
+      {{._dcomment_}}   volumes:
+      {{._dcomment_}}     - "../..:/srv/http"
+      {{._dcomment_}}   networks:
+      {{._dcomment_}}     simplejen:
+
+    networks:
+      simplejen:
+        driver: bridge
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
