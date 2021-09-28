@@ -1,45 +1,58 @@
 # https://taskfile.dev
 
 version: '3'
-env:
-  _vcomment: '#'
+
+env: &merge_env
+  DCVAR_JENCONDA_DIMG_ADDR: yairdar/jenconda:v0.8.2rc-2021.09.27rc
+  DCVAR_UI_JENKINS_PORT_EXT: "28082"
 
 vars:
-  GREETING: Hello, World!
-  _dcomment_: "$(echo '$_vcomment')"
-
-  VAL_DC_UI_JENKINS_PORT_EXT: 28082
-
-  __gens_docker_compose_cont: |-
-    version: "3.9"
-    services:
-      jencondait.samexample.com:
-        hostname: 'jencondait.samexample.com'
-        image: yairdar/jenconda:v0.8.2rc-2021.09.27rc
-        ports:
-          - "{{.VAL_DC_UI_JENKINS_PORT_EXT}}:8080"
-        volumes:
-          - "/var/run/docker.sock:/var/run/docker.sock"
-          - "../..:/repo"
-        {{._dcomment_}} network_mode: "host"
-        networks:
-          simplejen:
-
-      {{._dcomment_}} httpit:
-      {{._dcomment_}}   image: pierrezemb/gostatic
-      {{._dcomment_}}   ports:
-      {{._dcomment_}}     - "8043:8043"
-      {{._dcomment_}}   volumes:
-      {{._dcomment_}}     - "../..:/srv/http"
-      {{._dcomment_}}   networks:
-      {{._dcomment_}}     simplejen:
-
-    networks:
-      simplejen:
-        driver: bridge
+  <<: *merge_env
+  docker_compose_yaml: docker-compose.yaml
 
 tasks:
-  default:
+  spin-up-flow:
+    desc: restart componets
     cmds:
-      - echo "{{.GREETING}}"
+      - task: spin-down
+        vars:
+          safe_run: 'true'
+      - task: spin-up-flow.prepare
+      - task: spin-up
+      - task: show-urls
+
+  show-env-ac:
+    desc: show environment activate cmd
     silent: true
+    cmds:
+      - |-
+        echo '
+        export DCVAR_JENCONDA_DIMG_ADDR=yairdar/jenconda:v0.8.2rc-2021.09.27rc
+        export DCVAR_UI_JENKINS_PORT_EXT=28082        
+        '
+
+  show-urls:
+    desc: shows urls of services
+    silent: true
+    cmds: ['echo "{{._show_url_exp}}" ']
+    vars:   
+      _show_url_exp: |-
+        ui-jenkins-url: http://localhost:${DCVAR_UI_JENKINS_PORT_EXT}
+  
+  spin-up-flow.prepare:
+    desc: _
+    cmds: 
+      - echo "{{.TASK}} done deps"
+
+  spin-up:
+    desc: _
+    cmds: 
+      - docker-compose -f {{.docker_compose_yaml}} up  -d
+  
+  spin-down:
+    desc: _
+    vars:
+      rest_suff: '{{if .safe_run}}| true{{else}} {{end}}'
+    cmds: 
+      - docker-compose -f {{.docker_compose_yaml}} down {{.rest_suff}}
+

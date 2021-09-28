@@ -2,12 +2,8 @@
 
 version: '3'
 
-vars:
-  GREETING: --------------
-
 tasks:
   default:
     cmds:
-      - task -l
       - echo "{{.GREETING}}"
     silent: true

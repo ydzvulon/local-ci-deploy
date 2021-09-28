@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  jencondait.samexample.com:
+    hostname: 'jencondait.samexample.com'
+    image: "${DCVAR_JENCONDA_DIMG_ADDR}"
+    ports:
+      - "${DCVAR_UI_JENKINS_PORT_EXT}:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      simplejen:
+
+networks:
+  simplejen:
+    driver: bridge
