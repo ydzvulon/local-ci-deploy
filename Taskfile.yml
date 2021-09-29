@@ -11,3 +11,11 @@ tasks:
       - task -l
       - echo "{{.GREETING}}"
     silent: true
+  
+  get-started:
+    desc: bootstrap instructions
+    cmds:
+      - |-
+        echo '
+        
+        '
