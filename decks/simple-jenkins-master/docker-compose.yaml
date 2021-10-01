@@ -8,8 +8,9 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
-      simplejen:
+      net_cicd_net:
 
+# --- networks:net_cicd_net ---
 networks:
-  simplejen:
-    driver: bridge
+  net_cicd_net:
+    external: true

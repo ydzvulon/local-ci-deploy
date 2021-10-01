@@ -44,8 +44,17 @@ tasks:
     cmds:
       - echo "{{.TASK}} done deps"
 
+  ensure-network:
+    desc: _
+    stastus:
+      - docker network inspect net_cicd_net
+    cmds:
+      - docker network create -d bridge net_cicd_net
+
   spin-up:
     desc: _
+    deps:
+      - task: ensure-network
     cmds:
       - docker-compose -f {{.docker_compose_yaml}} up  -d
 
@@ -54,4 +63,15 @@ tasks:
     vars:
       rest_suff: "{{if .safe_run}}| true{{else}} {{end}}"
     cmds:
-      - docker-compose -f {{.docker_compose_yaml}} down {{.rest_suff}}
+      - docker-compose -f {{.docker_compose_yaml}} down {{.rest_suff}} || true
+
+  remove:
+    desc: _
+    cmds:
+      - docker-compose -f {{.docker_compose_yaml}} down {{.rest_suff}} || true
+
+  recreate:
+    desc: _
+    cmds:
+      - task: remove
+      - task: spin-up-flow
