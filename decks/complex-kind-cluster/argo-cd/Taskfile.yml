@@ -1,0 +1,43 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  GREETING: Hello, World!
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+
+  ensure-name-space:
+    desc: _
+    status:
+      - kubectl get po -n argocd
+    cmds:
+      - kubectl create namespace argocd
+
+  deploy-argo-cd:
+    desc: _
+    deps:
+      - task: ensure-name-space
+    cmds:
+      - kubectl create namespace argocd
+      - kubectl apply -f manifests/install.yaml -n argocd
+
+  create-argo-ingress:
+    desc: _
+    cmds:
+      - kubectl apply -f manifests/ingress.service.yaml -n argocd
+
+  generate-password-argo:
+    desc: _
+    _desc: admin + mysupersecretpassword
+    cmds:
+      - |-
+        kubectl -n argocd patch secret argocd-secret \
+        -p '{"stringData": {
+          "admin.password": "$2y$12$Kg4H0rLL/RVrWUVhj6ykeO3Ei/YqbGaqp.jAtzzUSJdYWT6LUh/n6",
+          "admin.passwordMtime": "'$(date +%FT%T%Z)'"
+        }}' | tee /tmp/{{.TASK}}.token.$(date +"%s").txt

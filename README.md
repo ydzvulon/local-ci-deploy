@@ -11,4 +11,21 @@ task get-started
 
 ## articles
 
+- https://mohitgoyal.co/2021/04/30/setup-continuous-deployment-for-application-with-kubernetes-and-argo-cd/
 - https://en.sokube.ch/post/gitops-on-a-laptop-with-k3d-and-argocd-1
+
+## dev tools
+
+- https://webinstall.dev/
+- https://ellin.com/2021/05/16/integrating-jenkins-tanzu-build-service-and-argocd/
+- https://yetiops.net/posts/argocd-jenkins-pipeline/
+- https://github.com/cloudogu/gitops-playground
+- https://dev.to/dizveloper/gitops-w-argocd-a-tutorial-7o4
+
+> octant
+
+- https://github.com/sonaproject/octant-dashboard/blob/master/README.md
+- https://github.com/sokube/argocd-rocks/tree/master/app
+
+vs code k3d
+https://github.com/inercia/vscode-k3d/
