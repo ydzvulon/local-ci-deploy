@@ -1,5 +1,5 @@
 # https://taskfile.dev
-
+# https://github.com/eea/eea.docker.jenkins.slave-dind
 version: "3"
 
 env: &merge_env
@@ -11,6 +11,53 @@ vars:
   docker_compose_yaml: docker-compose.yaml
 
 tasks:
+  # append-dnd-server:
+  #   desc: _
+  #   cmds:
+  #     - |-
+  #       docker run -d --name=docker13 --hostname docker13 \
+  #       --network net_cicd_net \
+  #       -p "2375" -p "2376" \
+  #       --privileged=true \
+  #       docker:1.13-dind
+  append-dnd-server:
+    desc: _
+    cmds:
+      - |-
+        docker-compose up -d dnd.server.com
+
+  append-dnd-worker:
+    desc:
+    cmds:
+      - |-
+        docker run --rm \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        --link docker13 \
+        --privileged=true \
+        --network net_cicd_net \
+        -e DOCKER_HOST=tcp://docker13:2375 \
+        -e JAVA_OPTS="-Xmx2048m" \
+        -e JENKINS_MASTER="http://jencondait.samexample.com:8080" \
+        -e JENKINS_NAME="dnd-worker" \
+        -e JENKINS_USER=tester \
+        -e JENKINS_PASS=tester123 \
+        -e JENKINS_RETRY="10" \
+        eeacms/jenkins-slave-dind:1.13
+
+  append-worker:
+    desc:
+    cmds:
+      - |-
+        docker run -d \
+        --network net_cicd_net \
+        -e JAVA_OPTS="-Xmx2048m" \
+        -e JENKINS_MASTER="http://jencondait.samexample.com:8080" \
+        -e JENKINS_NAME="worker" \
+        -e JENKINS_USER=tester \
+        -e JENKINS_PASS=tester123 \
+        -e JENKINS_RETRY="10" \
+        eeacms/jenkins-slave
+
   spin-up-flow:
     desc: restart componets
     cmds:

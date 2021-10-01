@@ -7,5 +7,5 @@ Sample Usage Example for Jenlib and Jenconda
 ```bash
 task get-started
 ```
-
-## 
+- https://hub.docker.com/r/eeacms/jenkins-slave-dind
+##

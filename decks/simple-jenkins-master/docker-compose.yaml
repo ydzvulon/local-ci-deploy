@@ -5,10 +5,37 @@ services:
     image: "${DCVAR_JENCONDA_DIMG_ADDR}"
     ports:
       - "${DCVAR_UI_JENKINS_PORT_EXT}:8080"
+      - "50000"
+      - "40000"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       net_cicd_net:
+
+  dnd.server.com:
+    hostname: 'dnd.server.com'
+    image: "docker:1.13-dind"
+    privileged: true
+    ports:
+      - "2375"
+    networks:
+      net_cicd_net:
+
+  # jenworker.samexample.com:
+  #   hostname: 'jencondait.samexample.com'
+  #   image: jenkins/inbound-agent
+  #   ports:
+  #     - "${DCVAR_UI_JENKINS_PORT_EXT}:8080"
+  #   volumes:
+  #     - "/var/run/docker.sock:/var/run/docker.sock"
+  #   command:
+  #   networks:
+  #     net_cicd_net:
+# docker run --init jenkins/inbound-agent -url http://jencondait.samexample.com:8080 -workDir=/home/jenkins/agent 123 mora
+
+# docker run -d --network net_cicd_net --rm -e JAVA_OPTS="-Xmx2048m" -e JENKINS_MASTER="http://jencondait.samexample.com:8080" -e JENKINS_NAME="worker" -e JENKINS_USER=tester -e JENKINS_PASS=tester123 -e JENKINS_RETRY="10" eeacms/jenkins-slave
+
+# docker run -d --network $(docker network ls | grep jenkins | awk '{print $1}') --name slave101 -e JAVA_OPTS="-Xmx2048m" -e JENKINS_MASTER="http://master:8080" -e JENKINS_NAME="worker" -e JENKINS_USER=admin -e JENKINS_PASS=admin -e JENKINS_RETRY="10" eeacms/jenkins-slave
 
 # --- networks:net_cicd_net ---
 networks:
