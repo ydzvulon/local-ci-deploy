@@ -1,0 +1,71 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  GREETING: Hello, World!
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+
+  install-deps:
+    desc: _
+    deps:
+      - task: install-kind-exe
+      - task: install-kubectl
+      - task: install-argo-cli
+
+  install-kind-exe:
+    desc: _
+    status: [which kind]
+    cmds:
+      - |-
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64
+        chmod +x ./kind
+        sudo mv ./kind /usr/local/bin
+
+  install-kubectl:
+    desc: _
+    status: [which kubectl]
+    cmds:
+      - |
+        curl -LO https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl
+        chmod +x kubectl
+        sudo mv ./kubectl /usr/local/kubectl
+
+  install-argo-cli:
+    desc: _
+    status: [which argo]
+    cmds:
+      - |-
+        # Download the binary
+        curl -sLO https://github.com/argoproj/argo/releases/download/v3.1.3/argo-linux-amd64.gz
+
+        # Unzip
+        gunzip argo-linux-amd64.gz
+
+        # Make binary executable
+        chmod +x argo-linux-amd64
+
+        # Move binary to path
+        mv ./argo-linux-amd64 /usr/local/bin/argo
+
+        # Test installation
+        argo version
+
+  create-cluster:
+    desc: _
+    cmds:
+      - kind create cluster
+      - kubectl cluster-info --context kind-kind
+
+  deploy-argowf:
+    # https://github.com/johnworth/kind-argo
+    # https://dustinspecker.com/posts/viewing-argo-prometheus-metrics-using-kind/
+    # https://github.com/argoflow/argoflow
+    desc: _
+    cmds:
+      -
