@@ -1,9 +1,9 @@
 # https://taskfile.dev
 
-version: '3'
+version: "3"
 
 env: &merge_env
-  DCVAR_JENCONDA_DIMG_ADDR: yairdar/jenconda:v0.8.2rc-2021.09.27rc
+  DCVAR_JENCONDA_DIMG_ADDR: yairdar/jenconda:0.8.3-1633076394
   DCVAR_UI_JENKINS_PORT_EXT: "28082"
 
 vars:
@@ -16,7 +16,7 @@ tasks:
     cmds:
       - task: spin-down
         vars:
-          safe_run: 'true'
+          safe_run: "true"
       - task: spin-up-flow.prepare
       - task: spin-up
       - task: show-urls
@@ -27,32 +27,31 @@ tasks:
     cmds:
       - |-
         echo '
-        export DCVAR_JENCONDA_DIMG_ADDR=yairdar/jenconda:v0.8.2rc-2021.09.27rc
-        export DCVAR_UI_JENKINS_PORT_EXT=28082        
+        export DCVAR_JENCONDA_DIMG_ADDR={{.DCVAR_JENCONDA_DIMG_ADDR}}
+        export DCVAR_UI_JENKINS_PORT_EXT={{.DCVAR_UI_JENKINS_PORT_EXT}}
         '
 
   show-urls:
     desc: shows urls of services
     silent: true
     cmds: ['echo "{{._show_url_exp}}" ']
-    vars:   
+    vars:
       _show_url_exp: |-
         ui-jenkins-url: http://localhost:${DCVAR_UI_JENKINS_PORT_EXT}
-  
+
   spin-up-flow.prepare:
     desc: _
-    cmds: 
+    cmds:
       - echo "{{.TASK}} done deps"
 
   spin-up:
     desc: _
-    cmds: 
+    cmds:
       - docker-compose -f {{.docker_compose_yaml}} up  -d
-  
+
   spin-down:
     desc: _
     vars:
-      rest_suff: '{{if .safe_run}}| true{{else}} {{end}}'
-    cmds: 
+      rest_suff: "{{if .safe_run}}| true{{else}} {{end}}"
+    cmds:
       - docker-compose -f {{.docker_compose_yaml}} down {{.rest_suff}}
-

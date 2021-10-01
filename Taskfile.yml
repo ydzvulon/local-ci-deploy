@@ -1,6 +1,6 @@
 # https://taskfile.dev
 
-version: '3'
+version: "3"
 
 vars:
   GREETING: --------------
@@ -11,11 +11,16 @@ tasks:
       - task -l
       - echo "{{.GREETING}}"
     silent: true
-  
+
+  spin-up-flow:
+    desc: spinup jenkins master
+    cmds:
+      - task -d decks/simple-jenkins-master spin-up-flow
+
   get-started:
     desc: bootstrap instructions
     cmds:
       - |-
         echo '
-        
+        task spin-up-flow
         '
