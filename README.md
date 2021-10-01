@@ -29,3 +29,7 @@ task get-started
 
 vs code k3d
 https://github.com/inercia/vscode-k3d/
+
+The k3d Cluster
+
+- https://blog.ruanbekker.com/blog/2020/02/21/persistent-volumes-with-k3d-kubernetes/#:~:text=With%20k3d%20we%20can%20mount%20the%20host%20to,volume%20mapping%20which%20maps%20back%20to%20the%20host.
