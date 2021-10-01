@@ -11,20 +11,20 @@ vars:
   docker_compose_yaml: docker-compose.yaml
 
 tasks:
-  # append-dnd-server:
-  #   desc: _
-  #   cmds:
-  #     - |-
-  #       docker run -d --name=docker13 --hostname docker13 \
-  #       --network net_cicd_net \
-  #       -p "2375" -p "2376" \
-  #       --privileged=true \
-  #       docker:1.13-dind
   append-dnd-server:
     desc: _
     cmds:
       - |-
-        docker-compose up -d dnd.server.com
+        docker run -d --name=docker17 --hostname docker17 \
+        --network net_cicd_net \
+        -p "2375" \
+        --privileged=true \
+        docker:1.13-dind
+  # append-dnd-server:
+  #   desc: _
+  #   cmds:
+  #     - |-
+  #       docker-compose up -d dnd.server.com
 
   append-dnd-worker:
     desc:
@@ -32,17 +32,17 @@ tasks:
       - |-
         docker run --rm \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        --link docker13 \
         --privileged=true \
         --network net_cicd_net \
-        -e DOCKER_HOST=tcp://docker13:2375 \
+        --link docker17 \
+        -e DOCKER_HOST=tcp://docker17:2375 \
         -e JAVA_OPTS="-Xmx2048m" \
         -e JENKINS_MASTER="http://jencondait.samexample.com:8080" \
         -e JENKINS_NAME="dnd-worker" \
         -e JENKINS_USER=tester \
         -e JENKINS_PASS=tester123 \
         -e JENKINS_RETRY="10" \
-        eeacms/jenkins-slave-dind:1.13
+        eeacms/jenkins-slave-dind:19.03-3.26-2
 
   append-worker:
     desc:

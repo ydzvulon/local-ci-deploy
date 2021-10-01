@@ -12,14 +12,14 @@ services:
     networks:
       net_cicd_net:
 
-  dnd.server.com:
-    hostname: 'dnd.server.com'
-    image: "docker:1.13-dind"
-    privileged: true
-    ports:
-      - "2375"
-    networks:
-      net_cicd_net:
+  # dnd.server.com.local:
+  #   hostname: 'dnd.server.com.local'
+  #   image: "docker:1.19-dind"
+  #   privileged: true
+  #   ports:
+  #     - "2375"
+  #   networks:
+  #     net_cicd_net:
 
   # jenworker.samexample.com:
   #   hostname: 'jencondait.samexample.com'
