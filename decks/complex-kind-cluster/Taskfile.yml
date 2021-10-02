@@ -16,10 +16,10 @@ tasks:
 
     silent: true
 
-  install-deps:
+  install-all-deps:
     desc: _
     deps:
-      - task: install-kind-exe
+      - task: install-k3d-exe
       - task: install-kubectl
       - task: install-argo-cli
 
@@ -31,6 +31,13 @@ tasks:
         curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64
         chmod +x ./kind
         sudo mv ./kind /usr/local/bin
+
+  install-k3d-exe:
+    desc: _
+    status: [which k3d]
+    cmds:
+      - |-
+        wget -q -O - https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
 
   install-kubectl:
     desc: _
@@ -61,16 +68,10 @@ tasks:
         # Test installation
         argo version
 
-  create-cluster:
-    desc: _
-    cmds:
-      - kind create cluster
-      - kubectl cluster-info --context kind-kind
-
-  install-k3d-exe:
-    desc:
-    cmds:
-      - wget -q -O - https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
+  # install-k3d-exe:
+  #   desc:
+  #   cmds:
+  #     - wget -q -O - https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
 
   create-cluster-k3d:
     desc: _
