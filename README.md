@@ -33,3 +33,18 @@ https://github.com/inercia/vscode-k3d/
 The k3d Cluster
 
 - https://blog.ruanbekker.com/blog/2020/02/21/persistent-volumes-with-k3d-kubernetes/#:~:text=With%20k3d%20we%20can%20mount%20the%20host%20to,volume%20mapping%20which%20maps%20back%20to%20the%20host.
+- https://dzone.com/articles/how-to-set-up-jenkins-on-kubernetes
+- https://www.blazemeter.com/blog/how-to-setup-scalable-jenkins-on-top-of-a-kubernetes-cluster
+
+
+### argo patch for automation
+
+```
+kubectl patch role jenkins -p '{"rules": [{"apiGroups": ["argoproj.io"], "resources": ["workflowtemplates"], "verbs": ["get"]}, {"apiGroups": ["argoproj.io"], "resources": ["workflows"], "verbs": ["create", "list", "get", "update"]}]}'
+```
+
+### devops on k8s
+
+- https://devopswithkubernetes.com/part-1/3-introduction-to-networking
+- https://k3d.io/usage/guides/exposing_services/
+- https://keptn.sh/docs/concepts/
