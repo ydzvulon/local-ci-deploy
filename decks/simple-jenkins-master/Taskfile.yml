@@ -3,7 +3,7 @@
 version: "3"
 
 env: &merge_env
-  DCVAR_JENCONDA_DIMG_ADDR: yairdar/jenconda:0.8.7-1634602016
+  DCVAR_JENCONDA_DIMG_ADDR: yairdar/jenconda:0.9.1-1634627812
   DCVAR_UI_JENKINS_PORT_EXT: "28082"
 
 vars:
@@ -87,10 +87,10 @@ tasks:
     - sh: 'docker inspect docker17'
       msg: "dnd server required"
     status: 
-    - docker inspect dnd-service    
+    - docker inspect dnd-service2    
     cmds:
       - |-
-        docker run -d --name dnd-service \
+        docker run -d --name dnd-service2 \
         -v /var/run/docker.sock:/var/run/docker.sock \
         --restart=always \
         --privileged=true \
@@ -103,7 +103,7 @@ tasks:
         -e JENKINS_USER=tester \
         -e JENKINS_PASS=tester123 \
         -e JENKINS_RETRY="150" \
-        yairdar/jen_dnd_worker:0.8.7-1634602016
+        yairdar/jen_dnd_worker:0.9.1-1634627812
 
   spin-down:
     desc: _
