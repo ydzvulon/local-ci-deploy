@@ -94,10 +94,10 @@ tasks:
 
   ensure-network:
     desc: _
-    stastus:
-      - docker network inspect net_cicd_net
+    status:
+    - docker network inspect net_cicd_net
     cmds:
-      - docker network create -d bridge net_cicd_net
+    - docker network create -d bridge net_cicd_net
 
   spin-up:
     desc: _
