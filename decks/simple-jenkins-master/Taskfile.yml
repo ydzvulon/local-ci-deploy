@@ -3,7 +3,7 @@
 version: "3"
 
 env: &merge_env
-  DCVAR_JENCONDA_DIMG_ADDR: yairdar/jenconda:0.8.3-1633076394
+  DCVAR_JENCONDA_DIMG_ADDR: yairdar/jenconda:0.8.7-1634602016
   DCVAR_UI_JENKINS_PORT_EXT: "28082"
 
 vars:
@@ -42,7 +42,8 @@ tasks:
         -e JENKINS_USER=tester \
         -e JENKINS_PASS=tester123 \
         -e JENKINS_RETRY="10" \
-        eeacms/jenkins-slave-dind:19.03-3.26-2
+        yairdar/jen_dnd_worker:0.8.7-1634602016
+      # eeacms/jenkins-slave-dind:19.03-3.26-2
 
   append-worker:
     desc:
