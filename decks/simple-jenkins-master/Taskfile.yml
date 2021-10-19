@@ -29,6 +29,16 @@ tasks:
         export DCVAR_JENCONDA_DIMG_ADDR={{.DCVAR_JENCONDA_DIMG_ADDR}}
         export DCVAR_UI_JENKINS_PORT_EXT={{.DCVAR_UI_JENKINS_PORT_EXT}}
         '
+
+  setup-new-duo-cluster:
+    desc: setup cluster of one master and one worker dnd
+    cmds:
+      - task: append-dnd-server
+      - sleep 5
+      - task: spin-up
+      - sleep 5
+      - task: append-dnd-service
+      
   spin-up-flow:
     desc: restart componets
     cmds:
@@ -92,7 +102,7 @@ tasks:
         -e JENKINS_NAME="dnd-worker" \
         -e JENKINS_USER=tester \
         -e JENKINS_PASS=tester123 \
-        -e JENKINS_RETRY="10" \
+        -e JENKINS_RETRY="150" \
         yairdar/jen_dnd_worker:0.8.7-1634602016
 
   spin-down:
@@ -126,7 +136,7 @@ tasks:
         -e JENKINS_NAME="worker" \
         -e JENKINS_USER=tester \
         -e JENKINS_PASS=tester123 \
-        -e JENKINS_RETRY="10" \
+        -e JENKINS_RETRY="12" \
         eeacms/jenkins-slave
 
   append-dnd-worker:
