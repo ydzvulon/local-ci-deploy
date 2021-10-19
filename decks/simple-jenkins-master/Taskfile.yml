@@ -11,16 +11,123 @@ vars:
   docker_compose_yaml: docker-compose.yaml
 
 tasks:
-  append-dnd-server:
-    desc: _
+
+  show-urls:
+    desc: shows urls of services
+    silent: true
+    cmds: ['echo "{{._show_url_exp}}" ']
+    vars:
+      _show_url_exp: |-
+        ui-jenkins-url: http://localhost:${DCVAR_UI_JENKINS_PORT_EXT}
+
+  show-env-ac:
+    desc: show environment activate cmd
+    silent: true
     cmds:
       - |-
-        docker run -d --name=docker17 --hostname docker17 \
+        echo '
+        export DCVAR_JENCONDA_DIMG_ADDR={{.DCVAR_JENCONDA_DIMG_ADDR}}
+        export DCVAR_UI_JENKINS_PORT_EXT={{.DCVAR_UI_JENKINS_PORT_EXT}}
+        '
+  spin-up-flow:
+    desc: restart componets
+    cmds:
+      - task: spin-down
+        vars:
+          safe_run: "true"
+      - task: spin-up
+      - task: show-urls
+
+  spin-up:
+    desc: _
+    deps:
+      - task: ensure-network
+    cmds:
+      - docker-compose -f {{.docker_compose_yaml}} up  -d
+      - task: wait-for-it.sh 
+        vars: 
+          MYHOST__MYPORT: localhost:28082
+      - task: show-env-ac
+
+  ensure-network:
+    desc: _
+    status:
+    - docker network inspect net_cicd_net
+    cmds:
+    - docker network create -d bridge net_cicd_net
+
+  append-dnd-server:
+    desc: _
+    status: 
+    - docker inspect docker17
+    deps: 
+    - task: ensure-network
+    cmds:
+    - |-
+      docker run -d --name=docker17 --hostname docker17 \
+      --restart=always \
+      --network net_cicd_net \
+      -p "2375" \
+      --privileged=true \
+      docker:1.13-dind
+    
+  append-dnd-service:
+    desc: append dnd-worker to master for docker builds
+    preconditions:
+    - sh: 'docker inspect docker17'
+      msg: "dnd server required"
+    status: 
+    - docker inspect dnd-service    
+    cmds:
+      - |-
+        docker run -d --name dnd-service \
+        -v /var/run/docker.sock:/var/run/docker.sock \
         --restart=always \
-        --network net_cicd_net \
-        -p "2375" \
         --privileged=true \
-        docker:1.13-dind
+        --network net_cicd_net \
+        --link docker17 \
+        -e DOCKER_HOST=tcp://docker17:2375 \
+        -e JAVA_OPTS="-Xmx2048m" \
+        -e JENKINS_MASTER="http://jencondait.samexample.com:8080" \
+        -e JENKINS_NAME="dnd-worker" \
+        -e JENKINS_USER=tester \
+        -e JENKINS_PASS=tester123 \
+        -e JENKINS_RETRY="10" \
+        yairdar/jen_dnd_worker:0.8.7-1634602016
+
+  spin-down:
+    desc: _
+    vars:
+      rest_suff: "{{if .safe_run}}| true{{else}} {{end}}"
+    cmds:
+      - docker-compose -f {{.docker_compose_yaml}} down {{.rest_suff}} || true
+
+  remove:
+    desc: _
+    cmds:
+      - docker-compose -f {{.docker_compose_yaml}} down {{.rest_suff}} || true
+
+  recreate:
+    desc: _
+    cmds:
+      - task: remove
+      - task: spin-up-flow
+
+  # --- manual custom workers ---
+
+  append-worker:
+    desc: append regular worker to master
+    cmds:
+      - |-
+        docker run -d \
+        --network net_cicd_net \
+        -e JAVA_OPTS="-Xmx2048m" \
+        -e JENKINS_MASTER="http://jencondait.samexample.com:8080" \
+        -e JENKINS_NAME="worker" \
+        -e JENKINS_USER=tester \
+        -e JENKINS_PASS=tester123 \
+        -e JENKINS_RETRY="10" \
+        eeacms/jenkins-slave
 
   append-dnd-worker:
     desc: append dnd-worker to master for docker builds
@@ -40,79 +147,7 @@ tasks:
         -e JENKINS_RETRY="10" \
         yairdar/jen_dnd_worker:0.8.7-1634602016
   
-  append-dnd-service:
-    desc: append dnd-worker to master for docker builds
-    cmds:
-      - |-
-        docker run -d --name agent_smith \
-        -v /var/run/docker.sock:/var/run/docker.sock \
-        --restart=always \
-        --privileged=true \
-        --network net_cicd_net \
-        --link docker17 \
-        -e DOCKER_HOST=tcp://docker17:2375 \
-        -e JAVA_OPTS="-Xmx2048m" \
-        -e JENKINS_MASTER="http://jencondait.samexample.com:8080" \
-        -e JENKINS_NAME="dnd-worker" \
-        -e JENKINS_USER=tester \
-        -e JENKINS_PASS=tester123 \
-        -e JENKINS_RETRY="10" \
-        yairdar/jen_dnd_worker:0.8.7-1634602016
-      
-
-  append-worker:
-    desc: append regular worker to master
-    cmds:
-      - |-
-        docker run -d \
-        --network net_cicd_net \
-        -e JAVA_OPTS="-Xmx2048m" \
-        -e JENKINS_MASTER="http://jencondait.samexample.com:8080" \
-        -e JENKINS_NAME="worker" \
-        -e JENKINS_USER=tester \
-        -e JENKINS_PASS=tester123 \
-        -e JENKINS_RETRY="10" \
-        eeacms/jenkins-slave
-
-  spin-up-flow:
-    desc: restart componets
-    cmds:
-      - task: spin-down
-        vars:
-          safe_run: "true"
-      - task: spin-up-flow.prepare
-      - task: spin-up
-      - task: show-urls
-
-  show-env-ac:
-    desc: show environment activate cmd
-    silent: true
-    cmds:
-      - |-
-        echo '
-        export DCVAR_JENCONDA_DIMG_ADDR={{.DCVAR_JENCONDA_DIMG_ADDR}}
-        export DCVAR_UI_JENKINS_PORT_EXT={{.DCVAR_UI_JENKINS_PORT_EXT}}
-        '
-
-  show-urls:
-    desc: shows urls of services
-    silent: true
-    cmds: ['echo "{{._show_url_exp}}" ']
-    vars:
-      _show_url_exp: |-
-        ui-jenkins-url: http://localhost:${DCVAR_UI_JENKINS_PORT_EXT}
-
-  spin-up-flow.prepare:
-    desc: _
-    cmds:
-      - echo "{{.TASK}} done deps"
-
-  ensure-network:
-    desc: _
-    status:
-    - docker network inspect net_cicd_net
-    cmds:
-    - docker network create -d bridge net_cicd_net
+  # --- utilitis ---
 
   wait-for-it.sh:
     desc: _
@@ -143,31 +178,3 @@ tasks:
             sleep $period
         done
         echo "http://${MYHOST__MYPORT} is accessable"
-
-  spin-up:
-    desc: _
-    deps:
-      - task: ensure-network
-    cmds:
-      - docker-compose -f {{.docker_compose_yaml}} up  -d
-      - task: wait-for-it.sh 
-        vars: 
-          MYHOST__MYPORT: localhost:28082
-
-  spin-down:
-    desc: _
-    vars:
-      rest_suff: "{{if .safe_run}}| true{{else}} {{end}}"
-    cmds:
-      - docker-compose -f {{.docker_compose_yaml}} down {{.rest_suff}} || true
-
-  remove:
-    desc: _
-    cmds:
-      - docker-compose -f {{.docker_compose_yaml}} down {{.rest_suff}} || true
-
-  recreate:
-    desc: _
-    cmds:
-      - task: remove
-      - task: spin-up-flow
