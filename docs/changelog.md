@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.2-2021.10.-...
+
+- jenkins as a repo ...
+
 ## v0.1.1-2021.10.19pre
 
 - new dimgs: jenlib-runner-dimg  dev-editor-dimg  jenconda  jenmaster  jen_dnd_worker
