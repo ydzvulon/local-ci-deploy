@@ -16,18 +16,14 @@ tasks:
     cmds:
       - |-
         docker run -d --name=docker17 --hostname docker17 \
+        --restart=always \
         --network net_cicd_net \
         -p "2375" \
         --privileged=true \
         docker:1.13-dind
-  # append-dnd-server:
-  #   desc: _
-  #   cmds:
-  #     - |-
-  #       docker-compose up -d dnd.server.com
 
   append-dnd-worker:
-    desc:
+    desc: append dnd-worker to master for docker builds
     cmds:
       - |-
         docker run --rm \
@@ -43,10 +39,29 @@ tasks:
         -e JENKINS_PASS=tester123 \
         -e JENKINS_RETRY="10" \
         yairdar/jen_dnd_worker:0.8.7-1634602016
-      # eeacms/jenkins-slave-dind:19.03-3.26-2
+  
+  append-dnd-service:
+    desc: append dnd-worker to master for docker builds
+    cmds:
+      - |-
+        docker run -d --name agent_smith \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        --restart=always \
+        --privileged=true \
+        --network net_cicd_net \
+        --link docker17 \
+        -e DOCKER_HOST=tcp://docker17:2375 \
+        -e JAVA_OPTS="-Xmx2048m" \
+        -e JENKINS_MASTER="http://jencondait.samexample.com:8080" \
+        -e JENKINS_NAME="dnd-worker" \
+        -e JENKINS_USER=tester \
+        -e JENKINS_PASS=tester123 \
+        -e JENKINS_RETRY="10" \
+        yairdar/jen_dnd_worker:0.8.7-1634602016
+      
 
   append-worker:
-    desc:
+    desc: append regular worker to master
     cmds:
       - |-
         docker run -d \
@@ -99,12 +114,45 @@ tasks:
     cmds:
     - docker network create -d bridge net_cicd_net
 
+  wait-for-it.sh:
+    desc: _
+    silent: true
+    preconditions:
+    - sh: '[[ "{{.MYHOST__MYPORT}}" != "" ]]' 
+      msg: var:MYHOST__MYPORT=required
+    cmds:
+      - |-
+        #!/bin/bash
+        set -e
+
+        MYHOST__MYPORT={{.MYHOST__MYPORT}}
+
+        attempt_counter=0
+        max_attempts=${max_attempts:-30}
+        period=${period:-5}
+
+        until $(curl --output /dev/null --silent --head --fail http://${MYHOST__MYPORT}); do
+            if [ ${attempt_counter} -eq ${max_attempts} ];then
+              echo "Max attempts reached"
+              echo "Failed to reach ${MYHOST__MYPORT} after ${max_attempts}"
+              exit 1
+            fi
+
+            echo "... no response. will retry in ${period} sec."
+            attempt_counter=$(($attempt_counter+1))
+            sleep $period
+        done
+        echo "http://${MYHOST__MYPORT} is accessable"
+
   spin-up:
     desc: _
     deps:
       - task: ensure-network
     cmds:
       - docker-compose -f {{.docker_compose_yaml}} up  -d
+      - task: wait-for-it.sh 
+        vars: 
+          MYHOST__MYPORT: localhost:28082
 
   spin-down:
     desc: _
