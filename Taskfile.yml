@@ -12,15 +12,22 @@ tasks:
       - echo "{{.GREETING}}"
     silent: true
 
-  spin-up-flow:
-    desc: spinup jenkins master
+  dispatch-to-dir:
+    desc: _
     cmds:
-      - task -d decks/simple-jenkins-master spin-up-flow
+      - task -d {{.target_dir}} {{.task}}
 
-  get-started:
-    desc: bootstrap instructions
+  spin-up-flow: &with_simple_jenkins
+    vars:
+      task:  '{{splitList ":" .TASK | last}}'
+      target_dir: decks/simple-jenkins-master
+    desc: spinup {{.target_dir}}
     cmds:
-      - |-
-        echo '
-        task spin-up-flow
-        '
+    - task: dispatch-to-dir
+      vars:
+        target_dir: '{{.target_dir}}'
+        task: '{{.task}}'
+
+  show-urls:
+    <<: *with_simple_jenkins
+    desc: show urls

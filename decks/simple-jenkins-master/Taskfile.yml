@@ -38,7 +38,7 @@ tasks:
       - task: spin-up
       - sleep 5
       - task: append-dnd-service
-      
+
   spin-up-flow:
     desc: restart componets
     cmds:
@@ -54,8 +54,8 @@ tasks:
       - task: ensure-network
     cmds:
       - docker-compose -f {{.docker_compose_yaml}} up  -d
-      - task: wait-for-it.sh 
-        vars: 
+      - task: wait-for-it.sh
+        vars:
           MYHOST__MYPORT: localhost:28082
       - task: show-env-ac
 
@@ -68,9 +68,9 @@ tasks:
 
   append-dnd-server:
     desc: _
-    status: 
+    status:
     - docker inspect docker17
-    deps: 
+    deps:
     - task: ensure-network
     cmds:
     - |-
@@ -80,14 +80,14 @@ tasks:
       -p "2375" \
       --privileged=true \
       docker:1.13-dind
-    
+
   append-dnd-service:
     desc: append dnd-worker to master for docker builds
     preconditions:
     - sh: 'docker inspect docker17'
       msg: "dnd server required"
-    status: 
-    - docker inspect dnd-service2    
+    status:
+    - docker inspect dnd-service2
     cmds:
       - |-
         docker run -d --name dnd-service2 \
@@ -156,14 +156,14 @@ tasks:
         -e JENKINS_PASS=tester123 \
         -e JENKINS_RETRY="10" \
         yairdar/jen_dnd_worker:0.8.7-1634602016
-  
+
   # --- utilitis ---
 
   wait-for-it.sh:
     desc: _
     silent: true
     preconditions:
-    - sh: '[[ "{{.MYHOST__MYPORT}}" != "" ]]' 
+    - sh: '[[ "{{.MYHOST__MYPORT}}" != "" ]]'
       msg: var:MYHOST__MYPORT=required
     cmds:
       - |-
